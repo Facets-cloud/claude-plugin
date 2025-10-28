@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "facets-module": {
+      "command": "uvx",
+      "args": [
+        "facets-module-mcp",
+        "${CWD}"
+      ],
+      "env": {
+        "CONTROL_PLANE_URL": "https://demo.facetsapp.cloud",
+        "FACETS_PROFILE": "default"
+      }
+    }
+  }
+}

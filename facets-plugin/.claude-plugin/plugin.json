@@ -1,0 +1,12 @@
+{
+  "name": "facets-plugin",
+  "version": "1.0.0",
+  "description": "Facets MCP servers for infrastructure management and module development",
+  "author": {
+    "name": "Facets",
+    "email": "support@facets.cloud"
+  },
+  "homepage": "https://www.facets.cloud",
+  "keywords": ["facets", "infrastructure", "devops", "iac", "control-plane", "modules"],
+  "license": "MIT"
+}

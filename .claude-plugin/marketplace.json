@@ -1,0 +1,17 @@
+{
+  "name": "facets-marketplace",
+  "owner": {
+    "name": "Facets",
+    "email": "support@facets.cloud"
+  },
+  "plugins": [
+    {
+      "name": "facets-plugin",
+      "source": "./facets-plugin",
+      "version": "1.0.0",
+      "description": "Facets MCP servers for infrastructure management and module development",
+      "keywords": ["facets", "infrastructure", "devops", "iac"],
+      "license": "MIT"
+    }
+  ]
+}
