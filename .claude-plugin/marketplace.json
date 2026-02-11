@@ -9,8 +9,8 @@
       "name": "facets-plugin",
       "source": "./facets-plugin",
       "version": "1.0.0",
-      "description": "Facets MCP servers for infrastructure management and module development",
-      "keywords": ["facets", "infrastructure", "devops", "iac"],
+      "description": "Facets Cloud platform skills for Claude Code — blueprint management, module development, release debugging, and Raptor CLI operations",
+      "keywords": ["facets", "infrastructure", "devops", "iac", "terraform", "raptor", "blueprint", "platform-engineering"],
       "license": "MIT"
     }
   ]

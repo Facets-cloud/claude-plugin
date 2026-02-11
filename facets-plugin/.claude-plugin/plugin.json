@@ -1,12 +1,50 @@
 {
   "name": "facets-plugin",
   "version": "1.0.0",
-  "description": "Facets MCP servers for infrastructure management and module development",
+  "description": "Facets Cloud platform skills for Claude Code — blueprint management, module development, release debugging, and Raptor CLI operations",
   "author": {
     "name": "Facets",
     "email": "support@facets.cloud"
   },
   "homepage": "https://www.facets.cloud",
-  "keywords": ["facets", "infrastructure", "devops", "iac", "control-plane", "modules"],
-  "license": "MIT"
+  "keywords": ["facets", "infrastructure", "devops", "iac", "terraform", "raptor", "blueprint", "platform-engineering"],
+  "license": "MIT",
+  "skills": [
+    {
+      "id": "blueprint",
+      "name": "Blueprint Design & Management",
+      "description": "Design and manage Facets infrastructure blueprints using Raptor CLI",
+      "file": "skills/blueprint/SKILL.md"
+    },
+    {
+      "id": "module-design",
+      "name": "Module Design Guide",
+      "description": "Decision guide for bundling vs separating infrastructure into Facets modules",
+      "file": "skills/module-design/SKILL.md"
+    },
+    {
+      "id": "module-development",
+      "name": "Module Development",
+      "description": "Create Facets IaC modules and standard Terraform modules with best practices",
+      "file": "skills/module-development/SKILL.md"
+    },
+    {
+      "id": "release-debug",
+      "name": "Release Debugger",
+      "description": "Diagnose deployment and release failures using Raptor CLI and log analysis",
+      "file": "skills/release-debug/SKILL.md"
+    },
+    {
+      "id": "raptor",
+      "name": "Raptor Operations",
+      "description": "Execute Facets Control Plane operations via Raptor CLI (forked subagent)",
+      "file": "skills/raptor/SKILL.md"
+    },
+    {
+      "id": "analyze-logs",
+      "name": "Log Analyzer",
+      "description": "Analyze deployment logs to extract errors, root causes, and actionable fixes (forked subagent)",
+      "file": "skills/analyze-logs/SKILL.md"
+    }
+  ]
 }
