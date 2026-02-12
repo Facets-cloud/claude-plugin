@@ -144,7 +144,7 @@ raptor create artifact -p PROJECT --image IMAGE_URI --tag TAG
 ```bash
 raptor logs release -p PROJECT -e ENV RELEASE_ID
 raptor logs release -p PROJECT -e ENV -f RELEASE_ID    # Follow
-raptor auth whoami
+raptor whoami
 raptor auth can-i ACTION RESOURCE_TYPE -p PROJECT
 ```
 

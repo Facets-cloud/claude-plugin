@@ -125,7 +125,7 @@ raptor set artifact-uri --project PROJECT --environment ENV --image IMAGE_URI --
 
 ### Auth & Permissions
 ```bash
-raptor auth whoami
+raptor whoami
 raptor auth can-i ACTION RESOURCE_TYPE --project PROJECT
 ```
 

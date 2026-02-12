@@ -28,13 +28,17 @@ chmod +x /usr/local/bin/raptor
 
 # Authenticate
 raptor login
-raptor auth whoami
+raptor whoami
 ```
 
 ## Installation
 
 ```bash
-/install github:Facets-cloud/claude-plugin
+# Add the marketplace (one-time setup)
+/plugin marketplace add Facets-cloud/claude-plugin
+
+# Install the plugin
+/plugin install facets-plugin@facets-marketplace
 ```
 
 ## Skills
