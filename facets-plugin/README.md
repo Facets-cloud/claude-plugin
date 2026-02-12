@@ -10,23 +10,9 @@ Claude Code skills for the [Facets Cloud](https://facets.cloud) platform. Manage
 
 ### Install Raptor CLI
 
+Follow the installation instructions at [Facets-cloud/raptor-releases](https://github.com/Facets-cloud/raptor-releases), then authenticate:
+
 ```bash
-# macOS (Apple Silicon)
-curl -L -o /usr/local/bin/raptor \
-  https://github.com/Facets-cloud/raptor-releases/releases/latest/download/raptor-darwin-arm64
-chmod +x /usr/local/bin/raptor
-
-# macOS (Intel)
-curl -L -o /usr/local/bin/raptor \
-  https://github.com/Facets-cloud/raptor-releases/releases/latest/download/raptor-darwin-amd64
-chmod +x /usr/local/bin/raptor
-
-# Linux
-curl -L -o /usr/local/bin/raptor \
-  https://github.com/Facets-cloud/raptor-releases/releases/latest/download/raptor-linux-amd64
-chmod +x /usr/local/bin/raptor
-
-# Authenticate
 raptor login
 raptor whoami
 ```
