@@ -1,0 +1,12 @@
+{
+  "name": "devops-skills",
+  "version": "1.0.0",
+  "description": "DevOps skills for Claude Code — Kubernetes debugging, Terraform review, cloud cost analysis, secrets auditing, Docker optimization, and incident RCA",
+  "author": {
+    "name": "Facets",
+    "email": "support@facets.cloud"
+  },
+  "homepage": "https://www.facets.cloud",
+  "keywords": ["devops", "kubernetes", "terraform", "docker", "security", "incident", "cloud-cost", "sre"],
+  "license": "MIT"
+}
