@@ -42,9 +42,10 @@ DRY_RUN="${DRY_RUN:-0}"
 VERBOSE="${VERBOSE:-0}"
 TIMEOUT="${TIMEOUT:-120}"
 SKILLS_DIR="skills"
-RESULTS_DIR="/tmp/devops-skill-evals"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RESULTS_BASE="$SCRIPT_DIR/eval-results"
 
-mkdir -p "$RESULTS_DIR"
+mkdir -p "$RESULTS_BASE"
 
 # ─── Helpers ───────────────────────────────────────────────
 
@@ -150,11 +151,24 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     skill_content=$(cat "$skill_file")
     eval_count=$(json_array_len "$eval_file" "evals")
 
+    # Per-skill results directory
+    RESULTS_DIR="$RESULTS_BASE/$skill_name"
+    mkdir -p "$RESULTS_DIR"
+
     echo -e "${BLUE}Evaluating: $skill_name ($eval_count scenarios)${NC}"
     echo ""
 
     skill_passed=0
     skill_failed=0
+    report_lines=()
+    report_lines+=("# Eval Report: $skill_name")
+    report_lines+=("")
+    report_lines+=("- **Date:** $(date -u '+%Y-%m-%d %H:%M UTC')")
+    report_lines+=("- **Model:** $MODEL")
+    report_lines+=("- **Skill version:** $(grep '^version:' "$skill_file" | head -1 | sed 's/version: //' | tr -d '\"')")
+    report_lines+=("")
+    report_lines+=("| Eval | Scenario | Result | Assertions |")
+    report_lines+=("| ---- | -------- | ------ | ---------- |")
 
     for ((i=0; i<eval_count; i++)); do
         eval_id=$(json_get "$eval_file" "evals.$i.id")
@@ -248,9 +262,11 @@ JUDGEEOF
         if [[ $eval_failed -eq 0 ]]; then
             echo -e "  ${GREEN}  #$eval_id: PASS ($eval_passed/$scored assertions)${NC}"
             ((skill_passed++))
+            report_lines+=("| #$eval_id | ${eval_prompt:0:50}... | PASS | $eval_passed/$scored |")
         else
             echo -e "  ${RED}  #$eval_id: FAIL ($eval_passed/$scored passed, $eval_failed failed)${NC}"
             ((skill_failed++))
+            report_lines+=("| #$eval_id | ${eval_prompt:0:50}... | FAIL | $eval_passed/$scored |")
         fi
 
         ((total_evals++))
@@ -261,11 +277,23 @@ JUDGEEOF
     if [[ $skill_failed -eq 0 ]]; then
         echo -e "${GREEN}  $skill_name: ALL PASSED ($skill_passed/$((skill_passed+skill_failed)))${NC}"
         ((total_passed += skill_passed))
+        report_lines+=("" "**Result: ALL PASSED ($skill_passed/$((skill_passed+skill_failed)))**")
     else
         echo -e "${RED}  $skill_name: $skill_failed FAILED, $skill_passed passed${NC}"
         ((total_passed += skill_passed))
         ((total_failed += skill_failed))
+        report_lines+=("" "**Result: $skill_failed FAILED, $skill_passed passed**")
     fi
+
+    # Write markdown report
+    report_file="$RESULTS_DIR/report.md"
+    {
+        for line in "${report_lines[@]}"; do
+            echo "$line"
+        done
+    } > "$report_file"
+
+    echo "  Report: $report_file"
     echo ""
 done
 
@@ -281,7 +309,7 @@ score=0
 [[ $total_evals -gt 0 ]] && score=$(python3 -c "print(round($total_passed / ($total_passed + $total_failed) * 100, 1))" 2>/dev/null || echo "0")
 echo "  Score: ${score}%"
 echo ""
-echo "Results saved to: $RESULTS_DIR/"
+echo "Results saved to: $RESULTS_BASE/"
 
 if [[ $total_failed -eq 0 ]]; then
     echo -e "${GREEN}All evals passed.${NC}"

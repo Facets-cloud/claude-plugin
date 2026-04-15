@@ -61,3 +61,9 @@ temp/
 
 # Reference repos (cloned for research, not shipped)
 references/
+
+# Eval raw artifacts (prompts, responses, judge output) — ephemeral
+devops-skills/eval-results/*/*.txt
+devops-skills/eval-results/*/*.json
+# But keep the markdown reports for audit trail
+!devops-skills/eval-results/*/report.md
