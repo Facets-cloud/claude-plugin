@@ -58,3 +58,6 @@ ENV/
 tmp/
 temp/
 *.tmp
+
+# Reference repos (cloned for research, not shipped)
+references/
