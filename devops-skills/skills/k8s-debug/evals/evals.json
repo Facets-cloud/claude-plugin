@@ -26,7 +26,7 @@
         "Checks image name and tag for typos",
         "Checks imagePullSecrets configuration",
         "Relates the failure to the recent deploy as the trigger",
-        "Provides a specific fix, not all possible fixes"
+        "Explains what specific kubectl output would determine the exact fix needed"
       ],
       "files": []
     },
@@ -125,7 +125,7 @@
         "Considers shared dependencies (DNS, storage, network) as a common cause",
         "Considers a cluster-wide change (deploy, config, node upgrade) as the trigger",
         "Correlates the 30-minute timeline with recent cluster events",
-        "Uses or mentions the devil's advocate approach for this ambiguous case",
+        "Explicitly considers alternative explanations that could produce the same symptoms",
         "Presents multiple ranked hypotheses, not just one guess"
       ],
       "files": []
@@ -133,13 +133,13 @@
     {
       "id": 10,
       "prompt": "Pod was evicted after we did node maintenance. The deployment has 3 replicas but only 2 came back.",
-      "expected_output": "Should use expert knowledge from the skill: After Node Maintenance, Pods Don't Come Back. Should check if PDB is blocking, if new taints were added, or if the missing pod is a bare pod without a controller.",
+      "expected_output": "Should use expert knowledge from the skill: After Node Maintenance, Pods Don't Come Back. Should check ownerReferences to confirm pods are owned by a controller. Should check if PDB is blocking, if new taints were added after maintenance.",
       "assertions": [
         "Uses expert knowledge about post-maintenance pod behavior (skill section)",
         "Checks if PodDisruptionBudget is blocking rescheduling",
         "Checks if new taints were added to nodes after maintenance",
         "Checks if the deployment controller is attempting to reschedule the third replica",
-        "Verifies the pod has an owning controller (not a bare pod)",
+        "Checks ownerReferences to verify the pod is owned by a ReplicaSet or Deployment",
         "Checks node resources to see if the third replica can be placed"
       ],
       "files": []
@@ -151,7 +151,7 @@
       "assertions": [
         "Recognizes this is outside k8s-debug scope",
         "Does NOT attempt Terraform plan review",
-        "References or defers to tf-review skill or general Terraform guidance",
+        "Suggests the user seek Terraform-specific help rather than using k8s-debug",
         "Remains helpful — doesn't just refuse"
       ],
       "files": []
