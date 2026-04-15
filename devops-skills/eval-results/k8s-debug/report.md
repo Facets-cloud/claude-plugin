@@ -1,12 +1,12 @@
 # Eval Report: k8s-debug
 
-- **Date:** 2026-04-15 07:31 UTC
+- **Date:** 2026-04-15 07:42 UTC
 - **Model:** sonnet
 - **Skill version:** 2.0
 
 | Eval | Scenario | Result | Assertions |
 | ---- | -------- | ------ | ---------- |
-| #1 | My pod keeps restarting in production. It was work... | PASS | 7/7 |
+| #1 | My pod keeps restarting in production. It was work... | FAIL | 5/7 |
 | #2 | Pods are in ImagePullBackOff after a deploy.... | PASS | 6/6 |
 | #3 | Pod shows exit code 137 and keeps crashing.... | PASS | 7/7 |
 | #4 | our app is OOMKilled every few hours. it runs fine... | PASS | 7/7 |
@@ -17,6 +17,6 @@
 | #9 | Multiple pods across different deployments are fai... | PASS | 7/7 |
 | #10 | Pod was evicted after we did node maintenance. The... | PASS | 6/6 |
 | #11 | Can you review my Terraform plan for the new VPC?... | PASS | 4/4 |
-| #12 | kubectl is not working on my machine.... | FAIL | 2/4 |
+| #12 | kubectl is not working on my machine. I get comman... | PASS | 4/4 |
 
 **Result: 1 FAILED, 11 passed**

@@ -158,13 +158,13 @@
     },
     {
       "id": 12,
-      "prompt": "kubectl is not working on my machine.",
-      "expected_output": "Should handle as a preflight failure. Guide installation. Do NOT attempt to debug pods without kubectl.",
+      "prompt": "kubectl is not working on my machine. I get command not found.",
+      "expected_output": "Should handle as a preflight failure — kubectl is not installed. Should provide install commands. Should NOT attempt to debug pods without kubectl. Should offer to help once kubectl is available.",
       "assertions": [
-        "Treats this as a preflight failure",
-        "Provides install guidance for kubectl",
-        "Does NOT attempt to debug pods without kubectl",
-        "Offers to continue after kubectl is installed"
+        "Treats this as a preflight or prerequisite issue, not a pod debugging problem",
+        "Provides at least one install command for kubectl (e.g. brew install kubectl, apt-get, curl)",
+        "Does NOT attempt to investigate or debug pods without kubectl available",
+        "Offers to continue with debugging after kubectl is installed and working"
       ],
       "files": []
     }
