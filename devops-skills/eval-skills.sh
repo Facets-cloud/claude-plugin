@@ -82,18 +82,33 @@ print(len(obj))
 }
 
 run_claude() {
-    local prompt="$1"
+    local prompt_file="$1"
     local output_file="$2"
 
     if [[ "$DRY_RUN" == "1" ]]; then
-        echo "[DRY RUN] Would send prompt (${#prompt} chars)" > "$output_file"
+        echo "[DRY RUN] Would send prompt ($(wc -c < "$prompt_file") chars)" > "$output_file"
         return 0
     fi
 
-    timeout "$TIMEOUT" $CLAUDE_CMD --print \
-        --model "$MODEL" \
-        --max-turns 1 \
-        -p "$prompt" > "$output_file" 2>/dev/null || true
+    if command -v gtimeout &>/dev/null; then
+        TIMEOUT_CMD="gtimeout"
+    elif command -v timeout &>/dev/null; then
+        TIMEOUT_CMD="timeout"
+    else
+        TIMEOUT_CMD=""
+    fi
+
+    if [[ -n "$TIMEOUT_CMD" ]]; then
+        $TIMEOUT_CMD "$TIMEOUT" $CLAUDE_CMD --print \
+            --model "$MODEL" \
+            --max-turns 3 \
+            -p "$(cat "$prompt_file")" > "$output_file" 2>/dev/null || true
+    else
+        $CLAUDE_CMD --print \
+            --model "$MODEL" \
+            --max-turns 3 \
+            -p "$(cat "$prompt_file")" > "$output_file" 2>/dev/null || true
+    fi
 }
 
 # ─── Main ──────────────────────────────────────────────────
@@ -150,14 +165,20 @@ for skill_dir in "$SKILLS_DIR"/*/; do
 
         # Get assertions as JSON array
         assertions_json=$(json_get "$eval_file" "evals.$i.assertions")
-        assertion_count=$(python3 -c "import json; print(len(json.loads('$assertions_json')))" 2>/dev/null || echo 0)
+        assertion_count=$(python3 -c "
+import json, sys
+data = json.load(open('$eval_file'))
+print(len(data['evals'][$i]['assertions']))
+" 2>/dev/null || echo 0)
 
         echo -e "  Eval #$eval_id: ${DIM}${eval_prompt:0:70}...${NC}"
 
         # ── Step 1: Run the skill prompt ──
         response_file="$RESULTS_DIR/${skill_name}_eval${eval_id}_response.txt"
+        prompt_file="$RESULTS_DIR/${skill_name}_eval${eval_id}_prompt.txt"
 
-        skill_prompt="You are a DevOps assistant with the following skill loaded:
+        cat > "$prompt_file" << SKILLEOF
+You are a DevOps assistant with the following skill loaded:
 
 ---SKILL START---
 $skill_content
@@ -166,17 +187,20 @@ $skill_content
 The user says:
 $eval_prompt
 
-Respond as the skill instructs. Since you cannot actually run kubectl commands, describe exactly what commands you WOULD run, what you would look for in the output, and what your diagnosis and fix would be. Show your reasoning."
+Respond as the skill instructs. Since you cannot actually run kubectl commands, describe exactly what commands you WOULD run, what you would look for in the output, and what your diagnosis and fix would be. Show your reasoning.
+SKILLEOF
 
-        run_claude "$skill_prompt" "$response_file"
+        run_claude "$prompt_file" "$response_file"
         response=$(cat "$response_file")
 
         [[ "$VERBOSE" == "1" ]] && echo -e "    ${DIM}Response: ${#response} chars${NC}"
 
         # ── Step 2: Judge assertions ──
         judge_file="$RESULTS_DIR/${skill_name}_eval${eval_id}_judge.txt"
+        judge_prompt_file="$RESULTS_DIR/${skill_name}_eval${eval_id}_judge_prompt.txt"
 
-        judge_prompt="You are an eval judge. Score whether a skill response meets each assertion.
+        cat > "$judge_prompt_file" << JUDGEEOF
+You are an eval judge. Score whether a skill response meets each assertion.
 
 RESPONSE TO EVALUATE:
 $response
@@ -189,9 +213,10 @@ PASS|<assertion text>|<brief reason>
 or
 FAIL|<assertion text>|<brief reason>
 
-Output ONLY the scored lines, nothing else. One line per assertion."
+Output ONLY the scored lines, nothing else. One line per assertion.
+JUDGEEOF
 
-        run_claude "$judge_prompt" "$judge_file"
+        run_claude "$judge_prompt_file" "$judge_file"
         judge_output=$(cat "$judge_file")
 
         # ── Step 3: Parse results ──
