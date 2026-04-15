@@ -1,0 +1,177 @@
+{
+  "skill_name": "k8s-debug",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "My pod keeps restarting in production. It was working fine yesterday.",
+      "expected_output": "Should run preflight checks for kubectl and cluster access. Should ask which namespace or discover it. Should identify the pod status (CrashLoopBackOff) and check both current and previous container logs. Should look at recent events and correlate with recent deployments. Should check the container exit code to narrow the cause. Should present a hypothesis with supporting evidence and a causal chain diagram.",
+      "assertions": [
+        "Checks kubectl availability and cluster connectivity before investigating",
+        "Uses kubectl get pods to identify the failing pod and its status",
+        "Fetches both current and --previous logs to see the crash",
+        "Checks container exit code to classify the failure type",
+        "Looks at kubectl get events to correlate with recent changes",
+        "Correlates timing — asks or discovers what changed since yesterday",
+        "Presents root cause with evidence, not just a guess",
+        "Provides a fix with explanation of what it does and why"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "We deployed a new version and now pods are stuck in ImagePullBackOff.",
+      "expected_output": "Should immediately check the image name and tag on the failing pods. Should check if imagePullSecrets are configured. Should verify the image exists in the registry. Should check if this is a typo, a missing tag, or an auth issue. Should NOT waste time checking logs since the container never started.",
+      "assertions": [
+        "Identifies ImagePullBackOff as an image pull issue, not a runtime issue",
+        "Does NOT attempt to read container logs (container never started)",
+        "Checks the image name and tag via kubectl describe or jsonpath",
+        "Checks imagePullSecrets configuration",
+        "Considers common causes: typo, missing tag, registry auth, deleted image",
+        "Suggests specific fix based on evidence (not all possible fixes)",
+        "Relates the issue to the recent deployment as the likely trigger"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Pods are pending for 20 minutes and nothing is happening.",
+      "expected_output": "Should check events on the pending pods for scheduling failure reasons. Should check node resources (kubectl top nodes) and compare against pod resource requests. Should check for taints, affinity rules, and PVC binding issues. Should determine if this is a capacity issue, a constraint issue, or a storage issue.",
+      "assertions": [
+        "Checks pod events for scheduling failure reason (not just pod status)",
+        "Checks node resource availability (kubectl top nodes or describe nodes)",
+        "Checks pod resource requests against available capacity",
+        "Considers taints and tolerations as a possible cause",
+        "Considers PVC binding as a possible cause for stateful workloads",
+        "Distinguishes between cluster-wide capacity issue and pod-specific constraint",
+        "Recommends either scaling nodes or adjusting pod constraints based on evidence"
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "our app is OOMKilled every few hours. it runs fine for a while then dies",
+      "expected_output": "Should recognize this as a memory leak pattern (gradual, not immediate OOM). Should check memory limits vs actual usage. Should check restart count to confirm the pattern. Should investigate whether limits are too low or if the app has a memory leak. Should recommend either increasing limits (short-term) or investigating the leak (long-term).",
+      "assertions": [
+        "Recognizes gradual OOM as likely memory leak, not just undersized limits",
+        "Triggers on casual phrasing without requiring formal terminology",
+        "Checks current memory limits and requests",
+        "Checks restart count to confirm recurring pattern",
+        "Uses kubectl top pod to check current memory usage if pod is running",
+        "Distinguishes between too-low limits and actual memory leak",
+        "Provides both short-term fix (increase limits) and long-term advice (investigate leak)",
+        "Does NOT just say 'increase memory' without considering the leak angle"
+      ],
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Service is returning 503s but all pods show Running status.",
+      "expected_output": "Should recognize this as a 'running but not serving' scenario — the trickiest category. Should check readiness probes and endpoints. Should verify service selector matches pod labels. Should check if pods are actually healthy (not just Running status). Should test connectivity from inside the cluster. Should consider NetworkPolicy as a possible blocker.",
+      "assertions": [
+        "Does NOT assume Running means healthy — investigates deeper",
+        "Checks readiness probe configuration and whether probes are passing",
+        "Checks kubectl get endpoints to see if pods are registered with the service",
+        "Verifies service selector matches pod labels",
+        "Considers in-cluster connectivity test (exec into a pod or run a debug pod)",
+        "Considers NetworkPolicy as a possible cause",
+        "Checks if the application is actually listening on the expected port"
+      ],
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "A pod has been stuck in Terminating state for 30 minutes after I tried to delete it.",
+      "expected_output": "Should check for finalizers blocking deletion. Should check the deletionTimestamp to confirm delete was requested. Should investigate what the finalizer is waiting for. Should offer force delete as a last resort with appropriate warnings about the risks.",
+      "assertions": [
+        "Checks pod finalizers via jsonpath or describe",
+        "Checks deletionTimestamp to confirm deletion was requested",
+        "Investigates why the finalizer is blocking (volume unmount, external resource)",
+        "Does NOT immediately suggest force delete without investigation",
+        "Explains risks of force delete if suggesting it (orphaned resources, data)",
+        "Presents force delete as last resort with the exact command"
+      ],
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "After a node upgrade, several pods got evicted and some didn't come back.",
+      "expected_output": "Should check node conditions for pressure (memory, disk, PID). Should check which pods were evicted and whether their deployments attempted to reschedule. Should check if the upgraded nodes have different resources or taints. Should verify pod disruption budgets aren't blocking rescheduling.",
+      "assertions": [
+        "Checks node conditions for pressure (memory, disk, PID)",
+        "Lists evicted pods and their owning workloads (deployment, statefulset)",
+        "Checks if the deployment controller is attempting to reschedule",
+        "Considers new taints or changed resources on upgraded nodes",
+        "Considers PodDisruptionBudget as a possible blocker",
+        "Differentiates between pods that can't reschedule and pods with no controller"
+      ],
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "Init container is failing and the main container never starts. Here's the pod name: data-loader-7f8b9c-x2k4p in namespace etl.",
+      "expected_output": "Should check init container status and logs specifically. Should identify which init container is failing if there are multiple. Should check if the init container is waiting for a dependency (database, configmap, secret). Should not waste time on the main container since it never started.",
+      "assertions": [
+        "Targets the exact pod and namespace provided without asking again",
+        "Checks init container status via kubectl get pod jsonpath or describe",
+        "Fetches init container logs with -c flag for the specific init container",
+        "Does NOT check main container logs (it never started)",
+        "Investigates what the init container is waiting for or failing on",
+        "Considers missing ConfigMap, Secret, or dependency service as causes"
+      ],
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "I can't connect to my database from the application pod. The database pod is running fine.",
+      "expected_output": "Should recognize this as a networking/connectivity issue, not a pod failure. Should check the database service and endpoints. Should verify DNS resolution from the app pod. Should check NetworkPolicy. Should test connectivity from the app pod to the database pod/service. Should check if the database is actually accepting connections (not just Running status).",
+      "assertions": [
+        "Recognizes this as connectivity, not pod crash debugging",
+        "Checks database service and its endpoints",
+        "Tests DNS resolution from the app pod (nslookup/dig from debug container)",
+        "Considers NetworkPolicy blocking inter-pod traffic",
+        "Tests actual TCP connectivity to the database port",
+        "Checks database pod readiness (Running doesn't mean accepting connections)",
+        "Does NOT focus on app pod crash investigation"
+      ],
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "My deployment rollout is stuck. It says 1/3 replicas updated.",
+      "expected_output": "Should check rollout status and the deployment's strategy (rolling update params). Should identify the new pod that's failing to become ready. Should check if maxUnavailable/maxSurge settings are blocking progress. Should investigate WHY the new replica isn't ready (could be any of the failure types). Should suggest rollback if the new version is broken.",
+      "assertions": [
+        "Checks kubectl rollout status for the stuck deployment",
+        "Identifies which specific new pod is failing to become ready",
+        "Investigates the new pod's status (CrashLoop, Pending, readiness failing, etc.)",
+        "Checks deployment strategy (maxUnavailable, maxSurge) for blocking conditions",
+        "Suggests kubectl rollout undo as an option if the new version is broken",
+        "Does NOT just describe what a rolling update is — investigates the actual failure"
+      ],
+      "files": []
+    },
+    {
+      "id": 11,
+      "prompt": "Can you help me optimize my Dockerfile? The image is 2GB.",
+      "expected_output": "Should recognize this is NOT a Kubernetes debugging issue. Should politely redirect to the docker-optimize skill (or note it's a different domain). Should NOT attempt a full Dockerfile optimization using the k8s-debug workflow.",
+      "assertions": [
+        "Recognizes this is outside k8s-debug scope",
+        "Does NOT attempt Dockerfile optimization using k8s-debug workflow",
+        "References or defers to docker-optimize skill or general Docker guidance",
+        "Remains helpful — doesn't just refuse"
+      ],
+      "files": []
+    },
+    {
+      "id": 12,
+      "prompt": "kubectl is not installed on my machine. How do I debug my pods?",
+      "expected_output": "Should detect missing kubectl in preflight and guide installation before proceeding. Should provide install commands for the user's OS. Should NOT attempt to debug pods without kubectl.",
+      "assertions": [
+        "Detects kubectl is missing as a preflight failure",
+        "Provides install guidance (brew install kubectl, or platform-specific)",
+        "Does NOT attempt to proceed with debugging without kubectl",
+        "Offers to continue debugging after user installs kubectl"
+      ],
+      "files": []
+    }
+  ]
+}

@@ -7,7 +7,11 @@ version: "1.0"
 
 # Kubernetes Debug
 
-Autonomous Kubernetes troubleshooting. You investigate pod and service failures using kubectl, gather evidence before asking questions, diagnose root causes with causal chains, and prescribe actionable fixes.
+You are an expert Kubernetes troubleshooter. Think like an SRE — gather evidence, form hypotheses, test them, find the root cause.
+
+**You are NOT following a script.** The sections below are your knowledge base, not a checklist. Use your judgment to pick the right investigation path based on symptoms. Skip sections that don't apply. Combine techniques. Adapt.
+
+**Core behavior:** Tools first, questions later. Run kubectl to gather evidence before asking the user anything. When you do ask, ask ONE targeted question max.
 
 ## Preflight
 
@@ -40,7 +44,7 @@ kubectl get namespaces || echo "FIX: Check RBAC permissions"
 
 ## Your Thinking Chain
 
-### 1. LISTEN AND INTERPRET SYMPTOMS
+### LISTEN AND INTERPRET SYMPTOMS
 
 What is the user actually experiencing?
 
@@ -55,7 +59,7 @@ Don't interrogate with 20 questions. Instead:
 - Discover context automatically with kubectl
 - Ask at MOST one targeted clarifying question if you truly cannot proceed
 
-### 2. IDENTIFY FAILING RESOURCES
+### IDENTIFY FAILING RESOURCES
 
 Start by gathering the current state:
 
@@ -74,9 +78,9 @@ kubectl rollout status deployment/<name> -n <namespace> --timeout=10s
 kubectl get deployments,statefulsets,daemonsets -n <namespace>
 ```
 
-### 3. TRIAGE — CLASSIFY THE FAILURE
+### TRIAGE — CLASSIFY THE FAILURE
 
-Based on pod status, route to the right investigation path:
+The pod status tells you where to look:
 
 ```
 Pod Status Decision Tree
@@ -84,32 +88,30 @@ Pod Status Decision Tree
 
   kubectl get pods → status column
        │
-       ├── CrashLoopBackOff ──→ Container starts then crashes
-       │                         Go to: STEP 4a (Logs)
+       ├── CrashLoopBackOff ──→ Container starts then crashes (check logs)
        │
-       ├── ImagePullBackOff ──→ Can't pull container image
-       │   or ErrImagePull       Go to: STEP 4b (Image)
+       ├── ImagePullBackOff ──→ Can't pull container image (check image/registry)
+       │   or ErrImagePull
        │
-       ├── Pending ───────────→ Can't be scheduled to a node
-       │                         Go to: STEP 4c (Scheduling)
+       ├── Pending ───────────→ Can't be scheduled (check nodes/resources)
        │
-       ├── OOMKilled ─────────→ Container exceeded memory limit
-       │                         Go to: STEP 4d (Resources)
+       ├── OOMKilled ─────────→ Exceeded memory limit (check limits vs usage)
        │
-       ├── Evicted ───────────→ Node under pressure, pod evicted
-       │                         Go to: STEP 4e (Node Pressure)
+       ├── Evicted ───────────→ Node under pressure (check node conditions)
        │
-       ├── Terminating ───────→ Pod stuck in termination
-       │   (for >5 min)         Go to: STEP 4f (Finalizers)
+       ├── Terminating ───────→ Stuck in termination (check finalizers)
+       │   (for >5 min)
        │
-       ├── Init:Error ────────→ Init container failing
-       │   or Init:CrashLoop    Go to: STEP 4g (Init Containers)
+       ├── Init:Error ────────→ Init container failing (check init logs)
+       │   or Init:CrashLoop
        │
-       └── Running but ───────→ Pod runs but doesn't serve traffic
-           not working           Go to: STEP 4h (Readiness)
+       └── Running but ───────→ Runs but doesn't serve (check probes/endpoints)
+           not working
 ```
 
-### 4. INVESTIGATE
+### INVESTIGATION PLAYBOOK
+
+Reference commands and patterns for each failure type. Use what's relevant — you don't need all of these.
 
 #### 4a. CrashLoopBackOff — Container Crash
 
@@ -294,7 +296,7 @@ kubectl get pod <pod> -n <namespace> -o jsonpath='{.metadata.labels}'
 
 ---
 
-### 5. FORM HYPOTHESES
+### FORM HYPOTHESES
 
 Based on evidence gathered, present ranked theories:
 
@@ -320,7 +322,7 @@ Rank by:
 - **Impact**: Check high-impact causes even if less likely
 - **Testability**: Start with what's fastest to confirm or rule out
 
-### 6. DIAGNOSE THE ROOT CAUSE
+### DIAGNOSE THE ROOT CAUSE
 
 Connect evidence to a root cause. Present the causal chain:
 
@@ -352,7 +354,7 @@ Provide:
 - **Confidence level** with reasoning
 - **Causal chain** as ASCII diagram
 
-### 7. PRESCRIBE AND FIX
+### PRESCRIBE AND FIX
 
 Offer actionable resolution:
 
@@ -381,7 +383,7 @@ kubectl patch pod <pod> -n <namespace> -p '{"metadata":{"finalizers":null}}'
 - If there are multiple options, present them with trade-offs
 - Ask for confirmation on destructive operations
 
-### 8. VERIFY
+### VERIFY
 
 After fix is applied, confirm it worked:
 
