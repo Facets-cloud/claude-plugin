@@ -285,15 +285,16 @@ JUDGEEOF
         report_lines+=("" "**Result: $skill_failed FAILED, $skill_passed passed**")
     fi
 
-    # Write markdown report
-    report_file="$RESULTS_DIR/report.md"
-    {
-        for line in "${report_lines[@]}"; do
-            echo "$line"
-        done
-    } > "$report_file"
-
-    echo "  Report: $report_file"
+    # Write markdown report only for full suite runs (no specific eval ID)
+    if [[ -z "$target_eval" ]]; then
+        report_file="$RESULTS_DIR/report.md"
+        {
+            for line in "${report_lines[@]}"; do
+                echo "$line"
+            done
+        } > "$report_file"
+        echo "  Report: $report_file"
+    fi
     echo ""
 done
 
