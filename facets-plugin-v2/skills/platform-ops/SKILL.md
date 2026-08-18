@@ -187,7 +187,10 @@ raptor auth can-i ACTION RESOURCE_TYPE -p PROJECT
 
 ```bash
 raptor create project PROJECT_NAME --project-type TYPE
-raptor create project-type PROJECT_TYPE --description "Description"
+# Project types are IMPORTED, never created: `create project-type` is gone (it
+# copied the built-in `empty` type, which recent control planes delete at startup)
+raptor import project-type --managed facets/aws        # official bundle + its modules
+raptor import project-type -f project-type.yml         # your own; name + description = blank
 raptor create resource-type-mapping PROJECT_TYPE --resource-type TYPE/FLAVOR
 ```
 
